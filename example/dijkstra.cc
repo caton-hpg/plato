@@ -130,7 +130,6 @@ void run_dijkstra() {
       plato::edge_format_t::CSV, plato::double_decoder,
       FLAGS_alpha, FLAGS_part_by_in, encoder_ptr);
 
-  watch.mark("t1");
   plato::eid_t edges = graph_info.edges_;
   if (false == graph_info.is_directed_) { edges = edges * 2; }
 
@@ -158,9 +157,7 @@ void run_dijkstra() {
 
   auto partition_view = pbcsr->partitioner()->self_v_view();
   for (unsigned epoch_i = 0; weight_top_list.size() > 0 && epoch_i <= FLAGS_iterations; ++epoch_i) {
-    if (0 == cluster_info.partition_id_) {
-      LOG(INFO) << "partition:" << cluster_info.partition_id_ << ", epoch_i:" << epoch_i << ", weight_top_list.size():" << weight_top_list.size();
-    }
+    LOG(INFO) << "partition_id:" << cluster_info.partition_id_ << ", epoch_i:" << epoch_i << ", weight_top_list.size():" << weight_top_list.size();
 
     watch.mark("t2");
     active_current->clear();
@@ -174,24 +171,19 @@ void run_dijkstra() {
     opts.local_capacity_ = 4 * PAGESIZE;
     plato::broadcast_message<broadcast_message_t, plato::vid_t> (active_view,
       [&](const plato::mepa_bc_context_t<broadcast_message_t>& context, plato::vid_t v_i) {
-        LOG(INFO) << "send: vid=" << v_i << ", msg=" << top.first;
         context.send(broadcast_message_t{v_i,top.first});
       },
       [&](int /* p_i */, const broadcast_message_t& msg) {
-        LOG(INFO) << "recv: msg=" << msg.weight;
         auto neighbours = pbcsr->neighbours(msg.vid);
         for (auto it = neighbours.begin_; neighbours.end_ != it; ++it) {
           plato::vid_t dst = it->neighbour_;
-          LOG(INFO) << "recv: dst=" << dst << ", msg=" << msg.weight;
-          LOG(INFO) << "old distance: " << distance[dst] << ", new distance=" << (msg.weight + it->edata_);
           if (distance[dst] > msg.weight + it->edata_ ) {
-            // && plato::cas(&distance[dst], distance[dst], msg.weight + it->edata_)
             if (distance[dst] != INF) {
                weight_top_list.erase(weight_top_list.find(std::make_pair(distance[dst], dst))); 
             }
             distance[dst] = msg.weight + it->edata_;
+            LOG(INFO) <<  "partition_id:" << cluster_info.partition_id_ << ", " << dst << ", new distance:"<< distance[dst];
             weight_top_list.insert(std::make_pair(distance[dst], dst));
-            LOG(INFO) << "update weight_top_list: dst=" << dst << ", distance=" << distance[dst];
           }
         }
         return 1;
@@ -216,12 +208,11 @@ void run_dijkstra() {
 
  
   } // end iteration
-  
-  // LOG(INFO) << "total cost: " << watch.show("t0") / 1000.0 << "s";
+  LOG(INFO) << "total cost: " << watch.show("t0") / 1000.0 << "s";
 
   distance.template foreach<int> (
       [&](plato::vid_t v_i, double* pval) {
-        LOG(INFO) << "vid=" << v_i << ", distance=" << *pval;
+        LOG(INFO) << "partition_id:" << cluster_info.partition_id_ << ", vid=" << v_i << ", distance=" << *pval;
         return 0;
       }
     );
