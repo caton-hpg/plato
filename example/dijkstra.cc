@@ -27,6 +27,8 @@
 #include "plato/util/atomic.hpp"
 #include "plato/graph/graph.hpp"
 #include "plato/util/nebula_writer.h"
+#include "yas/types/std/set.hpp"
+#include "yas/types/std/pair.hpp"
 
 DEFINE_string(input,       "",     "input file, in csv format, without edge data");
 DEFINE_string(output,      "",      "output directory");
@@ -40,17 +42,22 @@ DEFINE_bool(need_encode,   false,                    "");
 DEFINE_string(encoder,     "single","single or distributed vid encoder");
 DEFINE_string(vtype,       "uint32",                 "");
 
-using edge_value_t = double;
+using edge_value_t         = double;
 using bcsr_spec_t          = plato::bcsr_t<edge_value_t, plato::sequence_balanced_by_source_t>;
 using partition_bcsr_t     = bcsr_spec_t::partition_t;
 using state_distance_t     = plato::dense_state_t<edge_value_t, partition_bcsr_t>;
 using bitmap_spec_t        = plato::bitmap_t<>;
-using weight_top_t = std::set<std::pair<edge_value_t,plato::vid_t>>;
-const edge_value_t INF = std::numeric_limits<edge_value_t>::max();
+using weight_top_t         = std::set<std::pair<edge_value_t,plato::vid_t>>;
+const edge_value_t INF     = std::numeric_limits<edge_value_t>::max();
 
 struct broadcast_message_t{
   plato::vid_t vid;
   edge_value_t weight;
+  
+  template<typename Ar>
+  void serialize(Ar &ar) {
+    ar & vid & weight;
+  }
 };
 
 template <typename VID_T>
@@ -69,35 +76,6 @@ inline plato::vid_t to_vid_t(const plato::vid_t& vid) {
 
 inline plato::vid_t to_vid_t(const std::string& vid) {
 	return std::stoi(vid);
-}
-
-std::string weight_top_2_str(const weight_top_t& list) {
-	std::string str;
-	for (auto it = list.begin(); it != list.end(); it++) {
-		str.append(reinterpret_cast<const char*>(&(it->first)), sizeof(edge_value_t));
-		str.append(reinterpret_cast<const char*>(&(it->second)), sizeof(plato::vid_t));
-	}
-	return str;
-}
-
-weight_top_t str_2_weight_top(std::string str) {
-	weight_top_t list;
-
-	auto* begin = &str[0];
-	auto* p_c = begin;
-	while (p_c != begin + str.length()) {
-		edge_value_t* weight = reinterpret_cast<edge_value_t*>(p_c);
-		p_c += sizeof(edge_value_t);
-		plato::vid_t* vid = reinterpret_cast<plato::vid_t*>(p_c);
-		p_c += sizeof(plato::vid_t);
-		list.insert(std::make_pair(*weight, *vid));
-	}
-	return list;
-}
-
-bool string_not_empty(const char*, const std::string& value) {
-  if (0 == value.length()) { return false; }
-  return true;
 }
 
 void init(int argc, char** argv) {
@@ -182,7 +160,6 @@ void run_dijkstra() {
                weight_top_list.erase(weight_top_list.find(std::make_pair(distance[dst], dst))); 
             }
             distance[dst] = msg.weight + it->edata_;
-            LOG(INFO) <<  "partition_id:" << cluster_info.partition_id_ << ", " << dst << ", new distance:"<< distance[dst];
             weight_top_list.insert(std::make_pair(distance[dst], dst));
           }
         }
@@ -191,13 +168,11 @@ void run_dijkstra() {
 
     // broadcast weight_top_list
     weight_top_t weight_top_global;
-    std::string weight_top_str = weight_top_2_str(weight_top_list);
-    plato::broadcast_message<std::string, plato::vid_t> (active_view,
-      [&](const plato::mepa_bc_context_t<std::string>& context, plato::vid_t v_i) {
-        context.send(weight_top_str);
+    plato::broadcast_message<weight_top_t, plato::vid_t> (active_view,
+      [&](const plato::mepa_bc_context_t<weight_top_t>& context, plato::vid_t v_i) {
+        context.send(weight_top_list);
       },
-      [&](int /* p_i */, const std::string& msg) {
-        auto list = str_2_weight_top(msg);
+      [&](int /* p_i */, const weight_top_t& list) {
         for(auto it = list.begin(); it != list.end(); it++){
           weight_top_global.insert(std::make_pair(it->first, it->second));
         }
@@ -210,14 +185,6 @@ void run_dijkstra() {
   } // end iteration
   LOG(INFO) << "total cost: " << watch.show("t0") / 1000.0 << "s";
 
-  distance.template foreach<int> (
-      [&](plato::vid_t v_i, double* pval) {
-        LOG(INFO) << "partition_id:" << cluster_info.partition_id_ << ", vid=" << v_i << ", distance=" << *pval;
-        return 0;
-      }
-    );
-
-  
   // save distance
   watch.mark("t1");
   {
