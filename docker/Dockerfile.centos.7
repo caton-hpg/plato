@@ -1,6 +1,9 @@
 FROM centos:7
 MAINTAINER platoteam
 
+COPY install-dependencies-nebula-centos.sh /usr/local/bin/
+RUN install-dependencies-nebula-centos.sh
+
 COPY install-dependencies.sh /usr/local/bin/
 RUN set -ex && \
     yum install -y sudo && \

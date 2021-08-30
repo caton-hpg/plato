@@ -1,6 +1,9 @@
 FROM debian:9
 MAINTAINER platoteam
 
+COPY install-dependencies-nebula-ubuntu.sh /usr/local/bin/
+RUN install-dependencies-nebula-ubuntu.sh
+
 COPY install-dependencies.sh /usr/local/bin/
 RUN set -ex && \
     apt-get update && \
