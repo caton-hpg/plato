@@ -14,7 +14,6 @@ debian_packages=(
     automake
     libtool
     pkg-config
-    cmake
     wget
     curl
     libnuma-dev
@@ -34,7 +33,6 @@ redhat_packages=(
     libtool
     wget
     curl
-    cmake
 )
 
 function install_bazel() {
