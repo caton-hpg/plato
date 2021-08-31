@@ -65,7 +65,6 @@ elif [ "$ID" = "centos" ] || [ "$ID" = "fedora" ] || [ "$ID" = "tlinux" ]; then
         bzip2-devel \
       && yum clean all \
       && rm -rf /var/cache/yum
-      if [ "x${VERSION}" != "x8" ]; then yum install -y centos-release-scl; fi
 else
     echo "Your system ($ID) is not supported by this script. Please install dependencies manually."
     exit 1

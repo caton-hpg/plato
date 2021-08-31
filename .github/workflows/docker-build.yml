@@ -41,7 +41,7 @@ jobs:
       run: |
         ./docker/install-dependencies-nebula.sh
     - name: build 3rd libraries.
-      timeout-minutes: 30
+      timeout-minutes: 60
       shell: bash
       run: |
         ./3rdtools.sh install
