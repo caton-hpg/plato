@@ -1,6 +1,8 @@
 #!/bin/bash
 set -ex
 
+. /etc/os-release
+
 if [ "$ID" = "ubuntu" ] || [ "$ID" = "debian" ]; then
     apt-get update && apt-get install -y --no-install-recommends \
       autoconf \
