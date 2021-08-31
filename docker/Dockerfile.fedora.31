@@ -1,9 +1,6 @@
 FROM fedora:31
 MAINTAINER platoteam
 
-COPY install-dependencies-nebula-centos.sh /usr/local/bin/
-RUN install-dependencies-nebula-centos.sh
-
 COPY install-dependencies.sh /usr/local/bin/
 RUN set -ex && \
     dnf install -y sudo && \
@@ -13,6 +10,9 @@ RUN set -ex && \
 
 COPY install-gosu.sh /usr/local/bin/
 RUN install-gosu.sh
+
+COPY install-dependencies-nebula-centos.sh /usr/local/bin/
+RUN install-dependencies-nebula-centos.sh
 
 RUN mkdir /data
 WORKDIR /data

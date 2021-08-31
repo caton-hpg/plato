@@ -1,4 +1,5 @@
 #!/bin/bash
+set -ex
 
 apt-get update && apt-get install -y --no-install-recommends \
     autoconf \
@@ -36,10 +37,10 @@ mkdir -p /opt/vesoft/toolset/cmake \
   && tar zxf cmake*.tar.gz -C /opt/vesoft/toolset/cmake --strip-components=1 \
   && rm -rf cmake*.tar.gz
 
-TOOLSET_CLANG_DIR=/opt/vesoft/toolset/clang/10.0.0
-PATH=/opt/vesoft/toolset/cmake/bin:${TOOLSET_CLANG_DIR}/bin:${PATH}
-CC=${TOOLSET_CLANG_DIR}/bin/gcc
-CXX=${TOOLSET_CLANG_DIR}/bin/g++
+export TOOLSET_CLANG_DIR=/opt/vesoft/toolset/clang/10.0.0
+export PATH=/opt/vesoft/toolset/cmake/bin:${TOOLSET_CLANG_DIR}/bin:${PATH}
+export CC=${TOOLSET_CLANG_DIR}/bin/gcc
+export CXX=${TOOLSET_CLANG_DIR}/bin/g++
 
 ## SHELL ["/bin/bash", "-c"]
 

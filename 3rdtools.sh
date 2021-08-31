@@ -3,6 +3,10 @@
 me=`basename "$0"`
 rootdir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 sourceroot="${rootdir}/.downloads"
+export TOOLSET_CLANG_DIR=/opt/vesoft/toolset/clang/10.0.0
+export PATH=/opt/vesoft/toolset/cmake/bin:${TOOLSET_CLANG_DIR}/bin:${PATH}
+export CC=${TOOLSET_CLANG_DIR}/bin/gcc
+export CXX=${TOOLSET_CLANG_DIR}/bin/g++
 
 function clean_exec {
   cmd=$*
