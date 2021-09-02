@@ -28,7 +28,7 @@ redhat_packages=(
     zlib-devel
     gcc
     gcc-c++
-    libstdc++-static
+    # libstdc++-static
     make
     libtool
     wget
@@ -54,11 +54,11 @@ function install_bazel() {
 if [ "$ID" = "ubuntu" ] || [ "$ID" = "debian" ]; then
     apt-get install -y "${debian_packages[@]}"
 elif [ "$ID" = "centos" ] || [ "$ID" = "fedora" ] || [ "$ID" = "tlinux" ]; then
-    if [ "$ID" = "centos" ] && [ "$VERSION_ID" = "8" ]; then # centos 8
-        dnf --enablerepo=PowerTools install -y "${redhat_packages[@]}"
-    else
+    # if [ "$ID" = "centos" ] && [ "$VERSION_ID" = "8" ]; then # centos 8
+    #     dnf --enablerepo=PowerTools install -y "${redhat_packages[@]}"
+    # else
         yum install -y "${redhat_packages[@]}"
-    fi
+    # fi
 else
     echo "Your system ($ID) is not supported by this script. Please install dependencies manually."
     exit 1

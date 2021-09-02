@@ -11,8 +11,8 @@ RUN set -ex && \
 COPY install-gosu.sh /usr/local/bin/
 RUN install-gosu.sh
 
-COPY install-dependencies-nebula-centos.sh /usr/local/bin/
-RUN install-dependencies-nebula-centos.sh
+COPY install-dependencies-nebula.sh /usr/local/bin/
+RUN install-dependencies-nebula.sh
 
 RUN mkdir /data
 WORKDIR /data

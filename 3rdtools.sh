@@ -12,6 +12,12 @@ echo "PATH='${PATH}'"
 echo "CC='${CC}'"
 echo "CXX='${CXX}'"
 
+if [[ ! -f $CC ]]
+then
+  echo "$CC does not exist on your filesystem."
+  exit 255
+fi
+
 function clean_exec {
   cmd=$*
   eval $cmd

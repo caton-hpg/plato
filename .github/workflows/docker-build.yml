@@ -22,24 +22,17 @@ jobs:
       fail-fast: false
       matrix:
         tag:
-          - centos.7
-          - centos.8
-          - ubuntu.16.04
-          - ubuntu.18.04
-          - debian.9
-          - debian.10
-          - fedora.31
+          - centos7
+          - centos8
+          - ubuntu1604
+          - ubuntu1804
+          - ubuntu2004
     container:
-      image: platograph/plato-dev:${{ matrix.tag }}
+      image: haotonghpg/nebula-plato-dev:${{ matrix.tag }}
     steps:
     - uses: actions/checkout@v1
       with:
         fetch-depth: 1
-    - name: install dependencies of nebula.
-      timeout-minutes: 30
-      shell: bash
-      run: |
-        ./docker/install-dependencies-nebula.sh
     - name: build 3rd libraries.
       timeout-minutes: 60
       shell: bash
