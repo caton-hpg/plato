@@ -5,36 +5,36 @@ set -ex
 . /etc/os-release
 
 debian_packages=(
-    unzip
+    ca-certificates
+    # unzip
     zip
-    gcc
-    g++
-    make
-    autoconf
+    # gcc
+    # g++
+    # make
+    # autoconf
     automake
     libtool
     pkg-config
-    cmake
-    wget
-    curl
+    # wget
+    # curl
     libnuma-dev
     zlib1g-dev
 )
 
 redhat_packages=(
+    ca-certificates
     which
     numactl-devel
-    unzip
+    # unzip
     zip
     zlib-devel
-    gcc
-    gcc-c++
-    libstdc++-static
-    make
+    # gcc
+    # gcc-c++
+    # libstdc++-static
+    # make
     libtool
-    wget
-    curl
-    cmake
+    # wget
+    # curl
 )
 
 function install_bazel() {
@@ -46,21 +46,16 @@ function install_bazel() {
     fi
     BAZEL_VERSION=1.2.0
     BAZEL_INSTALLER_FIL=bazel-$BAZEL_VERSION-installer-linux-x86_64.sh
-    BAZEL_INSTALLER=/tmp/$BAZEL_INSTALLER_FIL
-    curl -o $BAZEL_INSTALLER -sSL "https://github.com/bazelbuild/bazel/releases/download/$BAZEL_VERSION/$BAZEL_INSTALLER_FIL"
-    chmod +x $BAZEL_INSTALLER
-    $BAZEL_INSTALLER
-    rm $BAZEL_INSTALLER
+    wget -q "https://github.com/bazelbuild/bazel/releases/download/$BAZEL_VERSION/$BAZEL_INSTALLER_FIL"
+    chmod +x $BAZEL_INSTALLER_FIL
+    ./$BAZEL_INSTALLER_FIL
+    rm $BAZEL_INSTALLER_FIL
 }
 
 if [ "$ID" = "ubuntu" ] || [ "$ID" = "debian" ]; then
     apt-get install -y "${debian_packages[@]}"
 elif [ "$ID" = "centos" ] || [ "$ID" = "fedora" ] || [ "$ID" = "tlinux" ]; then
-    if [ "$ID" = "centos" ] && [ "$VERSION_ID" = "8" ]; then # centos 8
-        dnf --enablerepo=PowerTools install -y "${redhat_packages[@]}"
-    else
-        yum install -y "${redhat_packages[@]}"
-    fi
+    yum install -y "${redhat_packages[@]}"
 else
     echo "Your system ($ID) is not supported by this script. Please install dependencies manually."
     exit 1

@@ -3,6 +3,20 @@
 me=`basename "$0"`
 rootdir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 sourceroot="${rootdir}/.downloads"
+export TOOLSET_CLANG_DIR=/opt/vesoft/toolset/clang/10.0.0
+export PATH=/opt/vesoft/toolset/cmake/bin:${TOOLSET_CLANG_DIR}/bin:${PATH}
+export CC=${TOOLSET_CLANG_DIR}/bin/gcc
+export CXX=${TOOLSET_CLANG_DIR}/bin/g++
+echo "TOOLSET_CLANG_DIR='${TOOLSET_CLANG_DIR}'"
+echo "PATH='${PATH}'"
+echo "CC='${CC}'"
+echo "CXX='${CXX}'"
+
+if [[ ! -f $CC ]]
+then
+  echo "$CC does not exist on your filesystem."
+  exit 255
+fi
 
 function clean_exec {
   cmd=$*

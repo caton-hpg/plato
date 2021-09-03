@@ -6,9 +6,9 @@ cc_library (
         "include/common/thrift/*.h",
         "include/nebula/client/*.h",
     ]),
-    srcs = [
-        "lib64/libnebula_graph_client.so"
-    ],
+    srcs = glob([
+        "lib*/libnebula_graph_client.so"
+    ]),
     deps = [
         #"//3rd/jni:jni",
     ],
@@ -26,9 +26,9 @@ cc_library (
         "include/common/thrift/*.h",
         "include/nebula/sclient/*.h",
     ]),
-    srcs = [
-        "lib64/libnebula_storage_client.so"
-    ],
+    srcs = glob([
+        "lib*/libnebula_storage_client.so"
+    ]),
     deps = [
         #"//3rd/jni:jni",
     ],

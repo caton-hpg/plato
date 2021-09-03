@@ -1,5 +1,5 @@
-FROM ubuntu:18.04
-MAINTAINER platoteam
+ARG  VERSION=latest
+FROM vesoft/nebula-dev:${VERSION}
 
 COPY install-dependencies.sh /usr/local/bin/
 RUN set -ex && \
