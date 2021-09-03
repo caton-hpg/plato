@@ -28,7 +28,7 @@ jobs:
           - ubuntu1804
           - ubuntu2004
     container:
-      image: haotonghpg/nebula-plato-dev:${{ matrix.tag }}
+      image: vesoft/nebula-plato-dev:${{ matrix.tag }}
     steps:
     - uses: actions/checkout@v1
       with:
