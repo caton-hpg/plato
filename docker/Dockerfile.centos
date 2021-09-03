@@ -1,18 +1,15 @@
-FROM debian:9
-MAINTAINER platoteam
+ARG  VERSION=latest
+FROM vesoft/nebula-dev:${VERSION}
 
 COPY install-dependencies.sh /usr/local/bin/
 RUN set -ex && \
-    apt-get update && \
-    apt-get install -y sudo && \
+    yum install -y sudo && \
     install-dependencies.sh && \
-    rm -rf /var/lib/apt/lists/*
+    yum clean all -y && \
+    yum autoremove -y
 
 COPY install-gosu.sh /usr/local/bin/
 RUN install-gosu.sh
-
-COPY install-dependencies-nebula.sh /usr/local/bin/
-RUN install-dependencies-nebula.sh
 
 RUN mkdir /data
 WORKDIR /data
